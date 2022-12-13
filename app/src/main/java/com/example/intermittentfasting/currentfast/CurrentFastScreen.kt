@@ -26,6 +26,9 @@ fun CurrentFastScreen(
     vm: CurrentFastViewModel = hiltViewModel()
 ) {
     val fast by vm.currentFast.collectAsState()
+    var cleanedUpEnd by remember {
+        mutableStateOf("")
+    }
     var cleanedUpStart by remember {
         mutableStateOf("")
     }
@@ -69,6 +72,19 @@ fun CurrentFastScreen(
             }
             Button(onClick = {
                 vm.submitForgottenStart(cleanedUpStart)
+            }) {
+                Text("Submit")
+            }
+        } else {
+            DateAndTimePicker(
+                "Forgot to start END",
+                cleanedUpEnd
+            ) { date, month, year, hour, min ->
+                cleanedUpEnd =
+                    TimeUtils.convertStringsToUTCString(locale, date, month, year, hour, min)
+            }
+            Button(onClick = {
+                vm.submitForgottenEnd(cleanedUpEnd)
             }) {
                 Text("Submit")
             }

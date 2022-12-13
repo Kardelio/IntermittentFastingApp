@@ -21,6 +21,15 @@ class TimeUtils {
             return simpleDateFormat.format(calendar.time)
         }
 
+        fun getHourOfTheDay(): Int{
+            val calendar: Calendar = Calendar.getInstance()
+            return calendar.get(Calendar.HOUR_OF_DAY)
+        }
+        fun getMinuteOfTheDay(): Int{
+            val calendar: Calendar = Calendar.getInstance()
+            return calendar.get(Calendar.MINUTE)
+        }
+
         fun getTimeDifferenceToNow(locale: Locale, startTime: String): String {
             val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
             val calendar: Calendar = Calendar.getInstance(timeZone)

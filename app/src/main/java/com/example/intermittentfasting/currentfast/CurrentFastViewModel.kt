@@ -82,6 +82,12 @@ class CurrentFastViewModel @Inject constructor(
         }
     }
 
+    fun submitForgottenEnd(end: String) {
+        viewModelScope.launch {
+            usecase.manualFastEntryForForgottenEnd(end)
+        }
+    }
+
     /*
     toggle captures time everytime!
     saves it in DB

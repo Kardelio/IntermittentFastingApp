@@ -13,7 +13,11 @@ import javax.inject.Inject
 interface FastUseCase {
     suspend fun manualFastEntry(startDate: String, endDate: String)
 
+    suspend fun manualImportOfFasts(listOfFasts: List<Fast>)
+
     suspend fun manualFastEntryForForgottenStart(startDate: String)
+
+    suspend fun manualFastEntryForForgottenEnd(endDate: String)
 
     suspend fun toggleFast()
 
@@ -53,6 +57,27 @@ class FastUseCaseImpl @Inject constructor(
                     endTimestamp = TimeUtils.getTimestampFromString(locale, endDate)
                 )
             )
+        }
+    }
+
+    override suspend fun manualImportOfFasts(listOfFasts: List<Fast>) {
+        withContext(coroutineDispatcher)
+        {
+            repo.addMultipleFasts(listOfFasts)
+        }
+    }
+
+    override suspend fun manualFastEntryForForgottenEnd(endDate: String) {
+        withContext(coroutineDispatcher) {
+            val mostRecentFast = repo.getMostRecentFast()
+            if (mostRecentFast != null && mostRecentFast.isActive()) {
+                repo.updateFast(
+                    mostRecentFast.copy(
+                        endTimeUTC = endDate,
+                        endTimestamp = TimeUtils.getTimestampFromString(locale, endDate),
+                    )
+                )
+            }
         }
     }
 

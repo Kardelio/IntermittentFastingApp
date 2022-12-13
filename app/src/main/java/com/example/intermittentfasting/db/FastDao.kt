@@ -14,6 +14,9 @@ interface FastDao {
     @Insert(onConflict = REPLACE)
     suspend fun insertFast(fast: Fast)
 
+    @Insert(onConflict = REPLACE)
+    suspend fun insertMultipleFasts(listOfFasts: List<Fast>)
+
     @Query("SELECT * FROM fasts WHERE manuallyEnteredPastFast = 0 ORDER BY id DESC LIMIT 0, 1")
     suspend fun getMostRecentFast(): Fast?
 
@@ -22,6 +25,9 @@ interface FastDao {
 
     @Query("SELECT * FROM fasts WHERE endTimeUTC!='' ORDER BY endTimestamp DESC")
     fun getAllPastFasts(): Flow<List<Fast>>
+
+    @Query("SELECT * FROM fasts WHERE endTimeUTC!='' ORDER BY endTimestamp DESC")
+    suspend fun getAllPastFastsOnce(): List<Fast>
 
     @Query("DELETE FROM fasts WHERE id = :fastId")
     suspend fun deleteSpecificFast(fastId: Int)

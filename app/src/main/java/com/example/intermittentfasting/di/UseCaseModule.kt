@@ -3,6 +3,8 @@ package com.example.intermittentfasting.di
 import android.content.Context
 import com.example.intermittentfasting.domain.FastUseCase
 import com.example.intermittentfasting.domain.FastUseCaseImpl
+import com.example.intermittentfasting.domain.FileUseCase
+import com.example.intermittentfasting.domain.FileUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -26,6 +28,9 @@ class UseCaseModule(){
 
         @Binds
         fun getContext(@ApplicationContext context: Context): Context
+
+        @Binds
+        fun getFileUseCase(fileUseCase: FileUseCaseImpl): FileUseCase
 
         @Binds
         fun getCurrentFastUseCase(currentFastUseCaseImpl: FastUseCaseImpl): FastUseCase
