@@ -1,11 +1,11 @@
 package com.example.intermittentfasting
 
-import android.content.Context
+import android.Manifest
+import android.app.NotificationManager
 import android.os.Bundle
-import android.os.Environment
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -33,13 +34,6 @@ import com.example.intermittentfasting.manualentry.ManualEntryScreen
 import com.example.intermittentfasting.pastfasts.PastFastsScreen
 import com.example.intermittentfasting.ui.theme.IntermittentFastingTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.BufferedReader
-import java.io.DataInputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStreamReader
 
 enum class IFTabs(
     val title: String,
@@ -59,6 +53,15 @@ object IFDestinations {
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val activityResultLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+            } else {
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -67,6 +70,16 @@ class MainActivity : ComponentActivity() {
                 IMApp()
             }
         }
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        askForNotificationPermission()
+    }
+
+    private fun askForNotificationPermission() {
+        activityResultLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 }
 

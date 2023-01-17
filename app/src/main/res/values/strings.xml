@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">IntermittentFasting</string>
+
+    <plurals name="missed_days">
+        <item quantity="one">%d missed day</item>
+        <item quantity="other">%d missed days</item>
+    </plurals>
 </resources>

@@ -2,7 +2,7 @@ package com.example.intermittentfasting.domain
 
 import com.example.intermittentfasting.data.FastRepository
 import com.example.intermittentfasting.model.Fast
-import com.example.intermittentfasting.utils.TimeUtils
+import com.example.utils.TimeUtils
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -15,11 +15,11 @@ interface FastUseCase {
 
     suspend fun manualImportOfFasts(listOfFasts: List<Fast>)
 
-    suspend fun manualFastEntryForForgottenStart(startDate: String)
+    suspend fun manualFastEntryForForgottenStart(startDate: String, targetHours: Int? = null)
 
     suspend fun manualFastEntryForForgottenEnd(endDate: String)
 
-    suspend fun toggleFast()
+    suspend fun toggleFast(targetHours: Int? = null): FastCurrentActiveState
 
     suspend fun getCurrentOrLast(): Flow<Fast?>
 
@@ -81,20 +81,21 @@ class FastUseCaseImpl @Inject constructor(
         }
     }
 
-    override suspend fun manualFastEntryForForgottenStart(startDate: String) {
+    override suspend fun manualFastEntryForForgottenStart(startDate: String, targetHours: Int?) {
         withContext(coroutineDispatcher) {
             repo.updateFast(
                 Fast(
                     startTimeUTC = startDate,
                     endTimeUTC = "",
-                    startTimestamp = TimeUtils.getTimestampFromString(locale, startDate)
+                    startTimestamp = TimeUtils.getTimestampFromString(locale, startDate),
+                    targetHours = targetHours ?: 16
                 )
             )
         }
     }
 
-    override suspend fun toggleFast() {
-        withContext(coroutineDispatcher) {
+    override suspend fun toggleFast(targetHours: Int?) :FastCurrentActiveState{
+        return withContext(coroutineDispatcher) {
             val mostRecentFast = repo.getMostRecentFast()
             if (mostRecentFast == null || !mostRecentFast.isActive()) {
                 val dateString = TimeUtils.getCurrentUTCTimeString(locale)
@@ -103,8 +104,10 @@ class FastUseCaseImpl @Inject constructor(
                         startTimeUTC = dateString,
                         endTimeUTC = "",
                         startTimestamp = TimeUtils.getTimestampFromString(locale, dateString),
+                        targetHours = targetHours ?: 16
                     )
                 )
+                FastCurrentActiveState.NowActive
             } else {
                 val dateString = TimeUtils.getCurrentUTCTimeString(locale)
                 repo.updateFast(
@@ -113,6 +116,7 @@ class FastUseCaseImpl @Inject constructor(
                         endTimestamp = TimeUtils.getTimestampFromString(locale, dateString),
                     )
                 )
+                FastCurrentActiveState.NowInActive
             }
         }
     }

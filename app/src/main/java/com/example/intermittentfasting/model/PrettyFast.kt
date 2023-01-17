@@ -1,6 +1,6 @@
 package com.example.intermittentfasting.model
 
-import com.example.intermittentfasting.utils.TimeUtils
+import com.example.utils.TimeUtils
 import java.util.Locale
 
 class PrettyFast(

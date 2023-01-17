@@ -1,7 +1,9 @@
-package com.example.intermittentfasting.utils
+package com.example.utils
 
-import com.example.intermittentfasting.model.TimeContainer
+//import com.example.intermittentfasting.model.TimeContainer
+import com.example.utils.model.TimeContainer
 import java.text.SimpleDateFormat
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -14,6 +16,22 @@ class TimeUtils {
             return simpleDateFormat.parse(str) as Date
         }
 
+        fun getCurrentTimePlusXHours(plusAmount: Int): Long {
+            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
+            val calendar: Calendar = Calendar.getInstance(timeZone)
+            calendar.add(Calendar.HOUR, plusAmount)
+//            calendar.add(Calendar.MINUTE, plusAmount)
+            return calendar.timeInMillis
+        }
+
+        //TODO delet me
+        fun getCurrentTimePlusX(locale: Locale, plusAmount: Int): Long {
+            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
+            val calendar: Calendar = Calendar.getInstance(timeZone)
+            calendar.add(Calendar.SECOND, plusAmount)
+            return calendar.timeInMillis
+        }
+
         fun getCurrentUTCTimeString(locale: Locale): String {
             val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
             val calendar: Calendar = Calendar.getInstance(timeZone)
@@ -21,11 +39,48 @@ class TimeUtils {
             return simpleDateFormat.format(calendar.time)
         }
 
-        fun getHourOfTheDay(): Int{
+        fun getHourOfTheDay(): Int {
             val calendar: Calendar = Calendar.getInstance()
             return calendar.get(Calendar.HOUR_OF_DAY)
         }
-        fun getMinuteOfTheDay(): Int{
+
+        fun getDayDifference(
+            locale: Locale,
+            currentEndTimeStr: String,
+            previousStartTimeStr: String
+        ): Long {
+            val currentEnd = getDateFromString(locale, currentEndTimeStr)
+            val previousStart = getDateFromString(locale, previousStartTimeStr)
+//            val diff = Math.abs(previousStart.time - currentEnd.time)
+//           val days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
+            val t1 = currentEnd.toInstant().truncatedTo(ChronoUnit.DAYS)
+            val t2 = previousStart.toInstant().truncatedTo(ChronoUnit.DAYS)
+            return ChronoUnit.DAYS.between(t1, t2)
+//           return days.toInt()
+//            var different = previousStart.time - currentEnd.time
+//
+//            val secondsInMilli: Long = 1000
+//            val minutesInMilli = secondsInMilli * 60
+//            val hoursInMilli = minutesInMilli * 60
+//            val daysInMilli = hoursInMilli * 24
+//
+//            val elapsedDays: Long = different / daysInMilli
+//            different %= daysInMilli
+//            return elapsedDays.toInt()
+        }
+
+        fun getIsSameDay(
+            locale: Locale,
+            currentEndTimeStr: String,
+            previousStartTimeStr: String
+        ): Boolean {
+            val currentEnd = getDateFromString(locale, currentEndTimeStr)
+            val previousStart = getDateFromString(locale, previousStartTimeStr)
+            return currentEnd.toInstant().truncatedTo(ChronoUnit.DAYS)
+                .equals(previousStart.toInstant().truncatedTo(ChronoUnit.DAYS))
+        }
+
+        fun getMinuteOfTheDay(): Int {
             val calendar: Calendar = Calendar.getInstance()
             return calendar.get(Calendar.MINUTE)
         }

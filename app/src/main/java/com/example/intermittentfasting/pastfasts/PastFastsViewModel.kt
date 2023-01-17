@@ -5,7 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.intermittentfasting.domain.FastUseCase
 import com.example.intermittentfasting.domain.FileUseCase
+import com.example.intermittentfasting.model.EmptyFast
+import com.example.intermittentfasting.model.Fast
+import com.example.intermittentfasting.model.FastContainer
 import com.example.intermittentfasting.model.PastFast
+import com.example.utils.TimeUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,17 +24,17 @@ class PastFastsViewModel @Inject constructor(
     private val usecase: FastUseCase,
     private val fileUseCase: FileUseCase,
     private val locale: Locale
-): ViewModel(){
+) : ViewModel() {
 
-   private val _pastfasts: MutableStateFlow<List<PastFast>> = MutableStateFlow(emptyList())
-    val pastfasts: StateFlow<List<PastFast>> = _pastfasts.asStateFlow()
+    private val _pastfasts: MutableStateFlow<List<FastContainer>> = MutableStateFlow(emptyList())
+    val pastfasts: StateFlow<List<FastContainer>> = _pastfasts.asStateFlow()
 
     init {
         Log.d("BK", "VM init")
         viewModelScope.launch {
             usecase.getAllPastFasts().collectLatest { list ->
-                Log.d("BK","List: ${list}")
-                _pastfasts.value = list.map { PastFast.toPastFast(locale,it) }
+                Log.d("BK", "List: ${list}")
+                mapPastFasts(list)
             }
 //            usecase.getCurrentOrLast().collectLatest {
 //                if (it != null) {
@@ -41,11 +45,33 @@ class PastFastsViewModel @Inject constructor(
         }
     }
 
-   fun exportFileToDownloads(){
-        fileUseCase.writeFileWithFasts()
-   }
+    private fun mapPastFasts(list: List<Fast>) {
+        val out = mutableListOf<FastContainer>()
+        list.forEachIndexed { index, fast ->
+            if (index == 0) {
+                out.add(PastFast.toPastFast(locale, fast))
+            } else {
+                val previous = index - 1
+                val ans =
+                    TimeUtils.getDayDifference(locale, fast.endTimeUTC, list[previous].startTimeUTC)
+                Log.d("BK", "===> ${ans}")
+                if (ans < 1) {
+                    out.add(PastFast.toPastFast(locale, fast))
+                } else {
+                    Log.d("BK", "and $ans")
+                    out.add(EmptyFast(ans.toInt()))
+                    out.add(PastFast.toPastFast(locale, fast))
+                }
+            }
+        }
+        _pastfasts.value = out
+    }
 
-   fun importFileFromDownloads(){
+    fun exportFileToDownloads() {
+        fileUseCase.writeFileWithFasts()
+    }
+
+    fun importFileFromDownloads() {
         viewModelScope.launch {
 
             val oldFasts = fileUseCase.readInFileWithFasts()
@@ -53,10 +79,10 @@ class PastFastsViewModel @Inject constructor(
 
         }
 
-   }
+    }
 
-    fun deleteFast(pastFastId: Int){
-        Log.d("BK","Past fast: ${pastFastId}")
+    fun deleteFast(pastFastId: Int) {
+        Log.d("BK", "Past fast: ${pastFastId}")
         viewModelScope.launch {
             usecase.deleteSpecificFast(pastFastId)
         }

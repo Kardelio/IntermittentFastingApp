@@ -4,6 +4,10 @@ import com.example.intermittentfasting.data.FastRepository
 import com.example.intermittentfasting.data.FastRepositoryImpl
 import com.example.intermittentfasting.data.FileRepository
 import com.example.intermittentfasting.data.FileRepositoryImpl
+import com.example.intermittentfasting.data.SharedPreferencesRepository
+import com.example.intermittentfasting.data.SharedPreferencesRepositoryImpl
+import com.example.intermittentfasting.data.UserRepository
+import com.example.intermittentfasting.data.UserRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,4 +22,10 @@ interface RepositoryModule {
 
     @Binds
     fun bindRepo(repo: FastRepositoryImpl): FastRepository
+
+    @Binds
+    fun bindsUserRepo(userRepo: UserRepositoryImpl): UserRepository
+
+    @Binds
+    fun bindsSharedPrefsRepo(sharedPreferencesRepositoryImpl: SharedPreferencesRepositoryImpl): SharedPreferencesRepository
 }

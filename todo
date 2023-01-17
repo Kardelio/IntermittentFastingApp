@@ -1,3 +1,14 @@
 DONE 1. time picker should start at now time
 2. all fasts should show only last X amont
 3. graph in the top of the last fasts
+
+Add timezone to times display
+AS when i went to the UK the time went back one hour on my phone
+and the time reflected the new timezone in the app
+so i essentially lost an hour of fasting time, really it should stick to the
+timezone that I started the fast in... that would be the accurate version of
+how long i fasted for...
+
+
+* Add on BOOT complete returns the alarms to being present as alarms delete on device shutdown
+* Add past fast stats on the past fasts screen
