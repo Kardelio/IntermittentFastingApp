@@ -28,7 +28,7 @@ import com.example.intermittentfasting.model.PastFast
 import com.example.utils.model.TimeContainer
 
 @Composable
-fun PastFastCard(pastFast: FastContainer, onClick: (Int) -> Unit) {
+fun SingleFastCard(pastFast: FastContainer, onClick: ((Int) -> Unit)? = null) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -64,12 +64,14 @@ fun PastFastCard(pastFast: FastContainer, onClick: (Int) -> Unit) {
                         style = TextStyle(fontSize = 14.sp, color = Color.Black.copy(alpha = 0.5f))
                     )
                 }
-                IconButton(modifier = Modifier.padding(8.dp), onClick = { onClick(pastFast.id) }) {
-                    Icon(
-                        modifier = Modifier.size(48.dp),
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null
-                    )
+                if(onClick != null){
+                    IconButton(modifier = Modifier.padding(8.dp), onClick = { onClick(pastFast.id) }) {
+                        Icon(
+                            modifier = Modifier.size(48.dp),
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null
+                        )
+                    }
                 }
             } else if (pastFast is EmptyFast) {
                 val a = LocalContext.current.resources.getQuantityString(
@@ -91,5 +93,5 @@ fun PastFastCard(pastFast: FastContainer, onClick: (Int) -> Unit) {
 @Preview
 @Composable
 fun PastFastCardPreview() {
-    PastFastCard(pastFast = PastFast(0, "abc", "cde", TimeContainer(2L, 3L, 4L, 5L),16)) {}
+    SingleFastCard(pastFast = PastFast(0, "abc", "cde", TimeContainer(2L, 3L, 4L, 5L),16)) {}
 }

@@ -8,7 +8,9 @@ class PrettyFast(
     val startTime: String,
     val endTime: String?,
     val explicitStart: String,
-    val explicitEnd: String?
+    val explicitEnd: String?,
+    val targetHours: Int,
+    val endTimeToDisplay: String
 ) {
     companion object {
         fun toPrettyFast(locale: Locale, fast: Fast): PrettyFast {
@@ -23,7 +25,16 @@ class PrettyFast(
                 else
                     null,
                 fast.startTimeUTC,
-                fast.endTimeUTC.ifBlank { null }
+                fast.endTimeUTC.ifBlank { null },
+                fast.targetHours,
+                TimeUtils.printNiceTime(
+                    locale,
+                    TimeUtils.calculateFinishTimeWithTarget(
+                        locale,
+                        fast.targetHours,
+                        fast.startTimeUTC
+                    )
+                )
             )
         }
     }

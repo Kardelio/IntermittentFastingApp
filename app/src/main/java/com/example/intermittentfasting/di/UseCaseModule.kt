@@ -5,6 +5,8 @@ import com.example.intermittentfasting.domain.FastUseCase
 import com.example.intermittentfasting.domain.FastUseCaseImpl
 import com.example.intermittentfasting.domain.FileUseCase
 import com.example.intermittentfasting.domain.FileUseCaseImpl
+import com.example.intermittentfasting.domain.StatsUseCase
+import com.example.intermittentfasting.domain.StatsUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -34,6 +36,9 @@ class UseCaseModule(){
 
         @Binds
         fun getCurrentFastUseCase(currentFastUseCaseImpl: FastUseCaseImpl): FastUseCase
+
+        @Binds
+        fun getStatsUseCase(statsUseCaseImpl: StatsUseCaseImpl): StatsUseCase
     }
 
 }

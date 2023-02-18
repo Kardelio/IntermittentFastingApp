@@ -9,6 +9,17 @@ so i essentially lost an hour of fasting time, really it should stick to the
 timezone that I started the fast in... that would be the accurate version of
 how long i fasted for...
 
-
+* export button to be better - downloadmanager?
 * Add on BOOT complete returns the alarms to being present as alarms delete on device shutdown
 * Add past fast stats on the past fasts screen
+* add days of the week to fast list (mark weekends as difference colour)
+* add new tab -> stats page.
+    longest fast
+    shortest fast
+    average length
+    last month chart
+* Add version information to the app current screen [ ]
+* Add achievements for fasting
+    - best time
+    - hurray 100 fasts or something with badges
+    - average fast goals

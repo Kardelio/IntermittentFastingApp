@@ -16,19 +16,19 @@ class TimeUtils {
             return simpleDateFormat.parse(str) as Date
         }
 
+        fun plusXHoursToTime(locale: Locale, timeIn: String, plusAmount: Int): Long {
+            val timeInStr = getDateFromString(locale, timeIn)
+            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
+            val calendar: Calendar = Calendar.getInstance(timeZone)
+            calendar.time = timeInStr
+            calendar.add(Calendar.HOUR, plusAmount)
+            return calendar.timeInMillis
+        }
+
         fun getCurrentTimePlusXHours(plusAmount: Int): Long {
             val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
             val calendar: Calendar = Calendar.getInstance(timeZone)
             calendar.add(Calendar.HOUR, plusAmount)
-//            calendar.add(Calendar.MINUTE, plusAmount)
-            return calendar.timeInMillis
-        }
-
-        //TODO delet me
-        fun getCurrentTimePlusX(locale: Locale, plusAmount: Int): Long {
-            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
-            val calendar: Calendar = Calendar.getInstance(timeZone)
-            calendar.add(Calendar.SECOND, plusAmount)
             return calendar.timeInMillis
         }
 
@@ -42,6 +42,31 @@ class TimeUtils {
         fun getHourOfTheDay(): Int {
             val calendar: Calendar = Calendar.getInstance()
             return calendar.get(Calendar.HOUR_OF_DAY)
+        }
+
+        fun getLengthOfFast(start: Long, end: Long): Long {
+            return end - start
+        }
+
+        fun calculateFinishTimeWithTarget(
+            locale: Locale,
+            targetHours: Int,
+            startTimeStr: String
+        ): String {
+            println("End time target: ${targetHours} -> ${startTimeStr}")
+            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
+            val calendar: Calendar = Calendar.getInstance(timeZone)
+            val a = getDateFromString(locale, startTimeStr)
+            calendar.time = a
+            calendar.add(Calendar.HOUR, targetHours)
+            val sdf = SimpleDateFormat("EE MMM dd HH:mm:ss zzz yyyy", locale)
+            val str = sdf.format(calendar.time)
+
+
+            println("--- time target: ${targetHours} -> ${str}")
+
+
+            return str
         }
 
         fun getDayDifference(
@@ -69,28 +94,13 @@ class TimeUtils {
 //            return elapsedDays.toInt()
         }
 
-        fun getIsSameDay(
-            locale: Locale,
-            currentEndTimeStr: String,
-            previousStartTimeStr: String
-        ): Boolean {
-            val currentEnd = getDateFromString(locale, currentEndTimeStr)
-            val previousStart = getDateFromString(locale, previousStartTimeStr)
-            return currentEnd.toInstant().truncatedTo(ChronoUnit.DAYS)
-                .equals(previousStart.toInstant().truncatedTo(ChronoUnit.DAYS))
-        }
-
         fun getMinuteOfTheDay(): Int {
             val calendar: Calendar = Calendar.getInstance()
             return calendar.get(Calendar.MINUTE)
         }
 
-        fun getTimeDifferenceToNow(locale: Locale, startTime: String): String {
-            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
-            val calendar: Calendar = Calendar.getInstance(timeZone)
-            val start = getDateFromString(locale, startTime)
-            var different = calendar.time.time - start.time
-
+        fun getLengthInTimeFromLong(length: Long): String {
+            var different = length
             val secondsInMilli: Long = 1000
             val minutesInMilli = secondsInMilli * 60
             val hoursInMilli = minutesInMilli * 60
@@ -107,6 +117,41 @@ class TimeUtils {
 
             val elapsedSeconds: Long = different / secondsInMilli
             return "${elapsedDays}d ${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s"
+        }
+
+        fun getTimeRemainingCountDown(locale: Locale, startTime: String, targetHours: Int): String {
+            //hours minutes seconds
+            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
+            val calendar: Calendar = Calendar.getInstance(timeZone)
+            val calendara: Calendar = Calendar.getInstance(timeZone)
+            val a = getDateFromString(locale, startTime)
+            calendar.time = a
+            calendar.add(Calendar.HOUR, targetHours)
+            val sdf = SimpleDateFormat("EE MMM dd HH:mm:ss zzz yyyy", locale)
+            val str = sdf.format(calendar.time)
+            val early = sdf.format(calendara.time)
+
+            val b = getTimeDifferenceBetweenTwoTimes(locale, early, str)
+            return b
+        }
+
+        fun getTimeDifferenceBetweenTwoTimes(
+            locale: Locale,
+            earlierTime: String,
+            laterTime: String
+        ): String {
+            val start = getDateFromString(locale, earlierTime)
+            val end = getDateFromString(locale, laterTime)
+            var different = end.time - start.time
+            return getLengthInTimeFromLong(different)
+        }
+
+        fun getTimeDifferenceToNow(locale: Locale, startTime: String): String {
+            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
+            val calendar: Calendar = Calendar.getInstance(timeZone)
+            val start = getDateFromString(locale, startTime)
+            var different = calendar.time.time - start.time
+            return getLengthInTimeFromLong(different)
         }
 
         fun isFirstDateBeforeOther(locale: Locale, dateOne: String, dateTwo: String): Boolean {

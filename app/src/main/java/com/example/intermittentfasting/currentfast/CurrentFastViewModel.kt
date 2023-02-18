@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.intermittentfasting.alarm.AlarmScheduler
+import com.example.intermittentfasting.data.AlarmRepository
 import com.example.intermittentfasting.data.UserRepository
 import com.example.intermittentfasting.domain.FastCurrentActiveState
 import com.example.intermittentfasting.domain.FastUseCase
@@ -34,6 +35,7 @@ import javax.inject.Inject
 class CurrentFastViewModel @Inject constructor(
     private val usecase: FastUseCase,
     private val userRepository: UserRepository,
+    private val alarmRepository: AlarmRepository,
     private val alarmScheduler: AlarmScheduler,
     private val locale: Locale
 ) : ViewModel() {
@@ -43,9 +45,11 @@ class CurrentFastViewModel @Inject constructor(
 
     val targetHours: MutableState<Int> = mutableStateOf(16)
 
-    val listOfCurrentAlarms = mutableListOf<Int>()
+    private val listOfCurrentAlarms = mutableListOf<Int>()
 
     init {
+        listOfCurrentAlarms.clear()
+        listOfCurrentAlarms.addAll(0, alarmRepository.getCurrentAlarmIds())
         targetHours.value = userRepository.getLastSetTargetHours()
         getCurrentTime()
         viewModelScope.launch {
@@ -61,59 +65,80 @@ class CurrentFastViewModel @Inject constructor(
         targetHours.value = hours
     }
 
+    fun getTimeRemaining(): String {
+        currentFast.value?.let {
+            return TimeUtils.getTimeRemainingCountDown(locale, it.explicitStart, it.targetHours)
+        } ?: run {
+            return ""
+        }
+    }
+
     fun getTimePassed(): String {
         currentFast.value?.let {
-            it.startTime
             return TimeUtils.getTimeDifferenceToNow(locale, it.explicitStart)
         } ?: run {
             return ""
         }
     }
 
+    private fun setupAlarmsForFast(oneHourBeforeTargetFinishTime: Long, targetFinishTime: Long) {
+        Log.d("BK", "Setting alrarms for notifications")
+        val hourPreTargetAlarmItem = FastAlarmItem(
+            oneHourBeforeTargetFinishTime,
+            "One Hour Left!",
+            "You made it to ${targetHours.value - 1} hours! One more hour left!",
+            targetHours.value
+        )
+        val targetAlarmItem = FastAlarmItem(
+            targetFinishTime,
+            "Fast Complete!",
+            "You did it! Fast is officially over! Great job! Go eat!",
+            targetHours.value
+        )
+        alarmScheduler.schedule(hourPreTargetAlarmItem)
+        alarmScheduler.schedule(targetAlarmItem)
+        listOfCurrentAlarms.add(hourPreTargetAlarmItem.hashCode())
+        listOfCurrentAlarms.add(targetAlarmItem.hashCode())
+        alarmRepository.saveCurrentAlarmIds(listOfCurrentAlarms)
+
+    }
+
+    private fun clearAllAlarms(){
+        listOfCurrentAlarms.forEach {
+            alarmScheduler.cancel(it)
+        }
+        listOfCurrentAlarms.clear()
+    }
+
     fun toggleFast() {
-        val oneHourBeforeTargetFinishTime = TimeUtils.getCurrentTimePlusXHours(targetHours.value - 1)
+        val oneHourBeforeTargetFinishTime =
+            TimeUtils.getCurrentTimePlusXHours(targetHours.value - 1)
         val targetFinishTime = TimeUtils.getCurrentTimePlusXHours(targetHours.value)
-        Log.d("BK", "Targets Hours : ${targetHours.value}")
-        Log.d("BK", "Targets : ${oneHourBeforeTargetFinishTime} and ${targetFinishTime}")
 
         userRepository.setLastTargetHours(targetHours.value)
         viewModelScope.launch {
             val activeState = usecase.toggleFast(targetHours.value)
             if (activeState == FastCurrentActiveState.NowActive) {
-                Log.d("BK", "Setting alrarms for notifications")
-                val hourPreTargetAlarmItem = FastAlarmItem(
-                    oneHourBeforeTargetFinishTime,
-                    "One Hour Left!",
-                    "You made it to ${targetHours.value - 1} hours! One more hour left!",
-                    targetHours.value
-                )
-                val targetAlarmItem = FastAlarmItem(
-                    targetFinishTime,
-                    "Fast Complete!",
-                    "You did it! Fast is officially over! Great job! Go eat!",
-                    targetHours.value
-                )
-                alarmScheduler.schedule(hourPreTargetAlarmItem)
-                alarmScheduler.schedule(targetAlarmItem)
-                listOfCurrentAlarms.add(hourPreTargetAlarmItem.hashCode())
-                listOfCurrentAlarms.add(targetAlarmItem.hashCode())
+                setupAlarmsForFast(oneHourBeforeTargetFinishTime, targetFinishTime)
             } else {
-                Log.d("BK", "Cancelling any alarms")
-                listOfCurrentAlarms.forEach {
-                    alarmScheduler.cancel(it)
-                }
-                listOfCurrentAlarms.clear()
+                clearAllAlarms()
             }
         }
     }
 
     fun submitForgottenStart(start: String) {
+        println(start)
+        val oneHourBeforeTargetFinishTime =
+            TimeUtils.plusXHoursToTime(locale, start,targetHours.value - 1)
+        val targetFinishTime = TimeUtils.plusXHoursToTime(locale, start,targetHours.value)
+        setupAlarmsForFast(oneHourBeforeTargetFinishTime, targetFinishTime)
         viewModelScope.launch {
             usecase.manualFastEntryForForgottenStart(start, targetHours.value)
         }
     }
 
     fun submitForgottenEnd(end: String) {
+        clearAllAlarms()
         viewModelScope.launch {
             usecase.manualFastEntryForForgottenEnd(end)
         }

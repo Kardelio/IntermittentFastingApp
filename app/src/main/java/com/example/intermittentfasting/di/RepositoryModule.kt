@@ -1,5 +1,7 @@
 package com.example.intermittentfasting.di
 
+import com.example.intermittentfasting.data.AlarmRepository
+import com.example.intermittentfasting.data.AlarmRepositoryImpl
 import com.example.intermittentfasting.data.FastRepository
 import com.example.intermittentfasting.data.FastRepositoryImpl
 import com.example.intermittentfasting.data.FileRepository
@@ -28,4 +30,7 @@ interface RepositoryModule {
 
     @Binds
     fun bindsSharedPrefsRepo(sharedPreferencesRepositoryImpl: SharedPreferencesRepositoryImpl): SharedPreferencesRepository
+
+    @Binds
+    fun bindsAlarmRepo(repo: AlarmRepositoryImpl): AlarmRepository
 }

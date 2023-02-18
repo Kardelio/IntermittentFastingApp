@@ -14,7 +14,12 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Gradient
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Monitor
+import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.intermittentfasting.currentfast.CurrentFastScreen
 import com.example.intermittentfasting.manualentry.ManualEntryScreen
 import com.example.intermittentfasting.pastfasts.PastFastsScreen
+import com.example.intermittentfasting.stats.StatsScreen
 import com.example.intermittentfasting.ui.theme.IntermittentFastingTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -40,15 +46,17 @@ enum class IFTabs(
     val icon: ImageVector,
     val route: String
 ) {
-    MANUAL_ENTRY("Manual", Icons.Default.List, IFDestinations.MANUAL_ENTRY),
+    MANUAL_ENTRY("Manual", Icons.Default.Edit, IFDestinations.MANUAL_ENTRY),
     FAST("Fast", Icons.Default.DateRange, IFDestinations.FAST),
-    PAST_FASTS("Past Fasts", Icons.Default.ShoppingCart, IFDestinations.PAST_FASTS)
+    PAST_FASTS("Past Fasts", Icons.Default.List, IFDestinations.PAST_FASTS),
+    STATS("Stats", Icons.Default.QueryStats, IFDestinations.STATS)
 }
 
 object IFDestinations {
     const val MANUAL_ENTRY = "manual_entry"
     const val FAST = "fast"
     const val PAST_FASTS = "past_fasts"
+    const val STATS = "stats"
 }
 
 @AndroidEntryPoint
@@ -108,7 +116,9 @@ fun IMApp() {
             }
             composable(IFTabs.PAST_FASTS.route) {
                 PastFastsScreen()
-
+            }
+            composable(IFTabs.STATS.route) {
+                StatsScreen()
             }
 
         }
