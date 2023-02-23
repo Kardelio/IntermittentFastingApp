@@ -1,7 +1,6 @@
 package com.example.intermittentfasting.currentfast
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -45,7 +43,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.chargemap.compose.numberpicker.NumberPicker
 import com.example.intermittentfasting.ui.theme.IntermittentFastingTheme
 import com.example.shared_ui.DateAndTimePicker
-import com.example.shared_ui.ProgressBar
+import com.example.shared_ui.ElapsedAndRemaining
+import com.example.shared_ui.FastingInfoBlock
+import com.example.shared_ui.FastingTitle
+import com.example.shared_ui.PercentageCircleButton
 import com.example.utils.TimeUtils
 import kotlinx.coroutines.delay
 
@@ -88,25 +89,35 @@ fun CurrentFastScreen(
 //            Text("Time remaining till target: ${remaining}")
             fast?.let {
                 CurrentlyFasting(
+                    modifier = Modifier.weight(1f),
                     it.startTime,
                     vm::getTimePassed,
                     vm::getTimeRemaining,
+                    vm::getCurrentFastPercentage,
                     it.targetHours,
                     it.endTimeToDisplay
-                )
+                ) {
+                    vm.toggleFast()
+                }
             }
         } else {
-            CurrentlyFeeding(targetHours = targetHours) {
+            CurrentlyFeeding(modifier = Modifier.weight(1f), targetHours = targetHours, {
                 vm.setTargetHours(it)
+            }) {
+                vm.toggleFast()
             }
         }
-        BigFastButton("toggle") {
-            vm.toggleFast()
-        }
-        Spacer(modifier = Modifier.height(32.dp))
         DateAndTimePicker(
+            modifier = Modifier.padding(vertical = 8.dp),
             label = "Forgot to " + if (!isActive) "Start" else "End",
             currentDateString = if (!isActive) cleanedUpStart else cleanedUpEnd,
+            onSubmit = {
+                if (!isActive) {
+                    vm.submitForgottenStart(cleanedUpStart)
+                } else {
+                    vm.submitForgottenEnd(cleanedUpEnd)
+                }
+            }
         ) { date, month, year, hour, min ->
             if (!isActive) {
                 cleanedUpStart =
@@ -116,23 +127,27 @@ fun CurrentFastScreen(
                     TimeUtils.convertStringsToUTCString(locale, date, month, year, hour, min)
             }
         }
-        Button(onClick = {
-            if (!isActive) {
-                vm.submitForgottenStart(cleanedUpStart)
-            } else {
-                vm.submitForgottenEnd(cleanedUpEnd)
-            }
-        }) {
-            Text("Submit")
-        }
     }
 }
 
 @Composable
-fun CurrentlyFeeding(targetHours: Int, setTargetHours: (Int) -> Unit) {
+fun CurrentFastTopInfoHeader() {
+
+}
+
+@Composable
+fun CurrentlyFeeding(
+    modifier: Modifier = Modifier,
+    targetHours: Int,
+    setTargetHours: (Int) -> Unit,
+    onButtonClick: () -> Unit
+) {
     //TODO show time when you should start next fast
-    Column {
-        Text("Currently FEEDING")
+    Column(
+        modifier = modifier.background(color = Color.Red), horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+//        Text("Currently FEEDING")
         NumberPicker(
             value = targetHours,
             range = 1..24,
@@ -140,92 +155,78 @@ fun CurrentlyFeeding(targetHours: Int, setTargetHours: (Int) -> Unit) {
                 setTargetHours(it)
             }
         )
+//        PercentageCircleButton() {
+//            onButtonClick()
+//
+//        }
+        PercentageCircleButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .padding(16.dp),
+            content = {
+                FastingInfoBlock(currentlyFasting = false)
+            },
+            padding = with(LocalDensity.current) { 12.dp.toPx() },
+            baseThickness = with(LocalDensity.current) { 32.dp.toPx() },
+            overlayThickness = with(LocalDensity.current) { 28.dp.toPx() },
+            currentPercent = 1f
+        ) {
+//            perr += 0.01f
+            onButtonClick()
+        }
     }
 }
 
 @Composable
 fun CurrentlyFasting(
+    modifier: Modifier = Modifier,
     startTime: String,
     getTimePassed: () -> String,
     getTimeRemaining: () -> String,
+    getCurrentFastPercentage: () -> Float,
     targetHours: Int,
-    endTime: String
+    endTime: String,
+    onButtonClick: () -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.background(color = Color.Red),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         var passed by remember { mutableStateOf("") }
         var remaining by remember { mutableStateOf("") }
+        var percentageOfFast by remember { mutableStateOf(0f) }
         LaunchedEffect(Unit) {
             while (true) {
                 passed = getTimePassed()
                 remaining = getTimeRemaining()
+                percentageOfFast = getCurrentFastPercentage()
+                println(percentageOfFast)
                 delay(1000)
             }
         }
-        Text("Fasting!")
-        Text("Start: ${startTime}")
-        Text("  End: ${endTime}")
-        Text("Target Hours: ${targetHours}")
-        ElapsedAndRemaining(elapsed = passed, remaining = remaining)
-        var perr by remember {
-            mutableStateOf(0.9f)
-        }
-        ProgressBar(
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(16.dp),
-            padding = with(LocalDensity.current) { 8.dp.toPx() },
-            baseThickness = with(LocalDensity.current) { 20.dp.toPx() },
-            overlayThickness = with(LocalDensity.current) { 20.dp.toPx() },
-            currentPercent = perr
-        ) {
-            perr += 0.01f
-        }
-        ProgressBar(
-            modifier = Modifier.size(100.dp),
-            padding = 10f,
-            baseThickness = with(LocalDensity.current) { 8.dp.toPx() },
-            overlayThickness = with(LocalDensity.current) { 12.dp.toPx() },
-            backgroundColor = Color.Black,
-            foregroundColor = Color.Green,
-            currentPercent = perr
-        ) {
-            perr += 0.01f
-        }
-//        Text("Time elapsed: ${passed}")
-//        Text("End Time: ${endTime}")
-//        Text("Time remaining till target: ${remaining}")
-    }
-}
-
-@Composable
-fun ElapsedAndRemaining(elapsed: String, remaining: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TitleAndTime("Elapsed", elapsed)
-        Spacer(
+//        Text("Fasting!")
+//        Text("Start: ${startTime}")
+//        Text("  End: ${endTime}")
+//        Text("Target Hours: ${targetHours}")
+//        ElapsedAndRemaining(elapsed = passed, remaining = remaining)
+        PercentageCircleButton(
             modifier = Modifier
-                .fillMaxHeight(0.8f)
-                .width(1.dp)
-                .background(color = Color.Black)
-        )
-        TitleAndTime("Remaining", remaining)
-    }
-}
-
-@Preview
-@Composable
-fun ElapsedAndRemainingPreview() {
-    ElapsedAndRemaining("abc", "gsdgs")
-}
-
-@Composable
-fun TitleAndTime(title: String, time: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(title, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp))
-        Text(time, style = TextStyle(fontSize = 20.sp))
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .padding(16.dp),
+            content = {
+                FastingInfoBlock(currentlyFasting = true, passed, remaining)
+            },
+            padding = with(LocalDensity.current) { 12.dp.toPx() },
+            baseThickness = with(LocalDensity.current) { 32.dp.toPx() },
+            overlayThickness = with(LocalDensity.current) { 28.dp.toPx() },
+            currentPercent = percentageOfFast
+        ) {
+//            perr += 0.01f
+            onButtonClick()
+        }
     }
 }
 
@@ -251,7 +252,6 @@ fun BigFastButton(
     }
 }
 
-@Preview
 @Composable
 fun BigFastButtonPreview() {
     BigFastButton("Test") {}

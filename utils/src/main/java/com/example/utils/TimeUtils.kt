@@ -11,6 +11,13 @@ import java.util.TimeZone
 
 class TimeUtils {
     companion object {
+
+        enum class TimeType {
+            SECONDS,
+            MINUTE,
+            HOUR
+        }
+
         private fun getDateFromString(locale: Locale, str: String): Date {
             val simpleDateFormat = SimpleDateFormat("EE MMM dd HH:mm:ss zzz yyyy", locale)
             return simpleDateFormat.parse(str) as Date
@@ -99,6 +106,39 @@ class TimeUtils {
             return calendar.get(Calendar.MINUTE)
         }
 
+        fun convertHoursToSeconds(hours: Int): Int {
+            return hours * 3600
+        }
+
+        fun convertMillisToX(millis: Long, timeType: TimeType = TimeType.SECONDS): Long {
+            //TODO handle timeypes
+            return millis / 1000
+        }
+
+        fun getLengthInTimeFromLongWithVariableDay(length: Long): String {
+            var different = length
+            val secondsInMilli: Long = 1000
+            val minutesInMilli = secondsInMilli * 60
+            val hoursInMilli = minutesInMilli * 60
+            val daysInMilli = hoursInMilli * 24
+
+            val elapsedDays: Long = different / daysInMilli
+            different %= daysInMilli
+
+            val elapsedHours: Long = different / hoursInMilli
+            different %= hoursInMilli
+
+            val elapsedMinutes: Long = different / minutesInMilli
+            different %= minutesInMilli
+
+            val elapsedSeconds: Long = different / secondsInMilli
+            return if (elapsedDays > 0) {
+                "${elapsedDays}d ${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s"
+            } else {
+                "${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s"
+            }
+        }
+
         fun getLengthInTimeFromLong(length: Long): String {
             var different = length
             val secondsInMilli: Long = 1000
@@ -143,7 +183,7 @@ class TimeUtils {
             val start = getDateFromString(locale, earlierTime)
             val end = getDateFromString(locale, laterTime)
             var different = end.time - start.time
-            return getLengthInTimeFromLong(different)
+            return getLengthInTimeFromLongWithVariableDay(different)
         }
 
         fun getTimeDifferenceToNow(locale: Locale, startTime: String): String {
@@ -151,7 +191,16 @@ class TimeUtils {
             val calendar: Calendar = Calendar.getInstance(timeZone)
             val start = getDateFromString(locale, startTime)
             var different = calendar.time.time - start.time
-            return getLengthInTimeFromLong(different)
+            println(different)
+            return getLengthInTimeFromLongWithVariableDay(different)
+        }
+
+        fun getSecondsDifferenceToNow(locale: Locale, startTime: String): Long {
+            val timeZone: TimeZone = TimeZone.getTimeZone("UTC")
+            val calendar: Calendar = Calendar.getInstance(timeZone)
+            val start = getDateFromString(locale, startTime)
+            var different = calendar.time.time - start.time
+            return convertMillisToX(different)
         }
 
         fun isFirstDateBeforeOther(locale: Locale, dateOne: String, dateTwo: String): Boolean {

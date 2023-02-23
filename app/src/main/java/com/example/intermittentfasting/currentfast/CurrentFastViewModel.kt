@@ -81,6 +81,34 @@ class CurrentFastViewModel @Inject constructor(
         }
     }
 
+    fun getCurrentFastPercentage(): Float {
+        //get minutes past
+        //get minutes total target
+        //514991
+        //target to seconds...
+//        currentFast.value?.let {
+//            return TimeUtils.getTimeRemainingCountDown(locale, it.explicitStart, it.targetHours)
+//        } ?: run {
+//            return ""
+//        }
+//        currentFast.value?.let {
+//            val a =TimeUtils.getSecondsDifferenceToNow(locale, it.explicitStart)
+//            return 0f
+//        } ?: run {
+//            return 0f
+//        }
+
+        currentFast.value?.let {
+            val targetInSeconds = TimeUtils.convertHoursToSeconds(it.targetHours) // = 100
+            val secondsDifference = TimeUtils.getSecondsDifferenceToNow(locale, it.explicitStart)
+
+            println("---> ${targetInSeconds} , ${secondsDifference}")
+            return secondsDifference.toFloat() / targetInSeconds.toFloat()
+        } ?: run {
+            return 0f
+        }
+    }
+
     private fun setupAlarmsForFast(oneHourBeforeTargetFinishTime: Long, targetFinishTime: Long) {
         Log.d("BK", "Setting alrarms for notifications")
         val hourPreTargetAlarmItem = FastAlarmItem(
@@ -103,7 +131,7 @@ class CurrentFastViewModel @Inject constructor(
 
     }
 
-    private fun clearAllAlarms(){
+    private fun clearAllAlarms() {
         listOfCurrentAlarms.forEach {
             alarmScheduler.cancel(it)
         }
@@ -129,8 +157,8 @@ class CurrentFastViewModel @Inject constructor(
     fun submitForgottenStart(start: String) {
         println(start)
         val oneHourBeforeTargetFinishTime =
-            TimeUtils.plusXHoursToTime(locale, start,targetHours.value - 1)
-        val targetFinishTime = TimeUtils.plusXHoursToTime(locale, start,targetHours.value)
+            TimeUtils.plusXHoursToTime(locale, start, targetHours.value - 1)
+        val targetFinishTime = TimeUtils.plusXHoursToTime(locale, start, targetHours.value)
         setupAlarmsForFast(oneHourBeforeTargetFinishTime, targetFinishTime)
         viewModelScope.launch {
             usecase.manualFastEntryForForgottenStart(start, targetHours.value)
