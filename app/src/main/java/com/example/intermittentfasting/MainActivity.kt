@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.intermittentfasting.awards.AwardsScreen
 import com.example.intermittentfasting.currentfast.CurrentFastScreen
 import com.example.intermittentfasting.manualentry.ManualEntryScreen
 import com.example.intermittentfasting.pastfasts.PastFastsScreen
@@ -47,9 +49,10 @@ enum class IFTabs(
     val route: String
 ) {
     MANUAL_ENTRY("Manual", Icons.Default.Edit, IFDestinations.MANUAL_ENTRY),
+    PAST_FASTS("Past", Icons.Default.List, IFDestinations.PAST_FASTS),
     FAST("Fast", Icons.Default.DateRange, IFDestinations.FAST),
-    PAST_FASTS("Past Fasts", Icons.Default.List, IFDestinations.PAST_FASTS),
-    STATS("Stats", Icons.Default.QueryStats, IFDestinations.STATS)
+    STATS("Stats", Icons.Default.QueryStats, IFDestinations.STATS),
+    AWARDS("Awards", Icons.Default.WorkspacePremium, IFDestinations.AWARDS)
 }
 
 object IFDestinations {
@@ -57,6 +60,7 @@ object IFDestinations {
     const val FAST = "fast"
     const val PAST_FASTS = "past_fasts"
     const val STATS = "stats"
+    const val AWARDS = "awards"
 }
 
 @AndroidEntryPoint
@@ -106,7 +110,7 @@ fun IMApp() {
         NavHost(
             modifier = Modifier.padding(it),
             navController = navController,
-            startDestination = IFTabs.FAST.route
+            startDestination = IFTabs.STATS.route
         ) {
             composable(IFTabs.FAST.route) {
                 CurrentFastScreen()
@@ -119,6 +123,9 @@ fun IMApp() {
             }
             composable(IFTabs.STATS.route) {
                 StatsScreen()
+            }
+            composable(IFTabs.AWARDS.route) {
+                AwardsScreen()
             }
 
         }

@@ -22,11 +22,15 @@ class StatsViewModel @Inject constructor(
     val stats: StateFlow<StatBlock?> = _stats.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            usecase.getStatsNumbers().collectLatest {
-                _stats.value = it
-            }
-        }
+        updateStats(false)
     }
+
+   fun updateStats(shouldShowEmptyDays: Boolean){
+       viewModelScope.launch {
+           usecase.getStatsNumbers(shouldShowEmptyDays).collectLatest {
+               _stats.value = it
+           }
+       }
+   }
 
 }

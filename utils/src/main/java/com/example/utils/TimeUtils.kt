@@ -110,9 +110,24 @@ class TimeUtils {
             return hours * 3600
         }
 
-        fun convertMillisToX(millis: Long, timeType: TimeType = TimeType.SECONDS): Long {
+        fun convertMillisToX(millis: Long, timeType: TimeType = TimeType.SECONDS): Float {
             //TODO handle timeypes
-            return millis / 1000
+            return when(timeType){
+                TimeType.SECONDS -> {
+                    (millis / 1000).toFloat()
+                }
+                TimeType.HOUR -> {
+                    println("---${((millis / (1000*60)) % 60)}")
+                    println("---${millis}")
+                    val minutes = (((millis / (1000*60)) % 60).toFloat()/60)
+                        //int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
+                    val hours = ((millis / (1000*60*60)) % 24)
+                    hours + minutes
+                }
+                else -> {
+                    (millis / 1000).toFloat()
+                }
+            }
         }
 
         fun getLengthInTimeFromLongWithVariableDay(length: Long): String {
@@ -200,7 +215,7 @@ class TimeUtils {
             val calendar: Calendar = Calendar.getInstance(timeZone)
             val start = getDateFromString(locale, startTime)
             var different = calendar.time.time - start.time
-            return convertMillisToX(different)
+            return convertMillisToX(different).toLong()
         }
 
         fun isFirstDateBeforeOther(locale: Locale, dateOne: String, dateTwo: String): Boolean {

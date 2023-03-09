@@ -19,5 +19,11 @@ data class Fast(
     fun isActive(): Boolean {
         return endTimeUTC.isBlank()
     }
+
+   companion object {
+       fun getEmptyFast(): Fast{
+           return Fast(startTimeUTC = "", endTimeUTC = "")
+       }
+   }
 }
 

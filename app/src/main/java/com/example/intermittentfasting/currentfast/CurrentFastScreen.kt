@@ -107,6 +107,7 @@ fun CurrentFastScreen(
                 vm.toggleFast()
             }
         }
+        CurrentFastFooter(fast?.startTime ?: "", fast?.endTimeToDisplay ?: "")
         DateAndTimePicker(
             modifier = Modifier.padding(vertical = 8.dp),
             label = "Forgot to " + if (!isActive) "Start" else "End",
@@ -128,6 +129,12 @@ fun CurrentFastScreen(
             }
         }
     }
+}
+
+@Composable
+fun CurrentFastFooter(startTime: String, endTime: String) {
+    Text("Start Time: ${startTime}")
+    Text("End Time: ${endTime}")
 }
 
 @Composable
