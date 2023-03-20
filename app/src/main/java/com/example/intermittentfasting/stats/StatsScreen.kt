@@ -87,7 +87,9 @@ fun StatsScreenContents(stats: StatBlock, toggleChanged: (Boolean) -> Unit) {
         LineGraph(
             stats.lastFastLengths,
             lastFastTargets = if (showTargets) stats.lastFastTargets else null,
-            showXAmountOfDataPoints = amount.amount
+            showXAmountOfDataPoints = amount.amount,
+            lastFastDaysSinceWeekend = stats.lastFastDaysSinceWeekend,
+            showDaysFlag = showDays
         )
         DisplayFastAmountButtons(
             maxAMountToShow = stats.numberOfItemsActuallyShowing,

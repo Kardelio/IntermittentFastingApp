@@ -110,7 +110,7 @@ fun IMApp() {
         NavHost(
             modifier = Modifier.padding(it),
             navController = navController,
-            startDestination = IFTabs.STATS.route
+            startDestination = IFTabs.FAST.route
         ) {
             composable(IFTabs.FAST.route) {
                 CurrentFastScreen()

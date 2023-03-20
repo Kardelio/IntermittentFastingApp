@@ -23,7 +23,8 @@ data class StatBlock(
     val mostRecentCompletedFast: Fast,
     val averageLength: Long,
     val lastFastLengths: List<Float>,
-    val lastFastTargets: List<Int>
+    val lastFastTargets: List<Int>,
+    val lastFastDaysSinceWeekend: Int
 )
 /*
 StatBlock
@@ -88,6 +89,8 @@ class StatsUseCaseImpl @Inject constructor(
                     // as the list is revered already
                     val firstFast = it.last()
                     val lastFast = it.first()
+//                    TimeUtils.getNumberOfDaysSinceWeekend(lastFast.endTimestamp)
+                    //lastfast
                     val allFastLengths =
                         completeFasts.map { TimeUtils.getLengthOfFast(it.startTimestamp, it.endTimestamp) }
 //                    println(allFastLengths)
@@ -123,7 +126,8 @@ class StatsUseCaseImpl @Inject constructor(
                             mostRecentCompletedFast = lastFast,
                             averageLength = allFastLengths.average().toLong(),
                             lastFastLengths = mm,
-                            lastFastTargets = fasttargets
+                            lastFastTargets = fasttargets,
+                            lastFastDaysSinceWeekend = TimeUtils.getNumberOfDaysSinceWeekend(lastFast.endTimestamp)
                         )
                     )
                 }

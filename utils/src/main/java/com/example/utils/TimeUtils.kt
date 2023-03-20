@@ -51,6 +51,23 @@ class TimeUtils {
             return calendar.get(Calendar.HOUR_OF_DAY)
         }
 
+
+        fun getDateFromTimestamp(timestamp: Long): Calendar {
+            val calendar: Calendar = Calendar.getInstance()
+            calendar.timeInMillis = timestamp
+            return calendar
+        }
+
+        fun getNumberOfDaysSinceWeekend(timestamp: Long): Int {
+
+            println("TS in: -> ${timestamp}")
+            val cal = getDateFromTimestamp(timestamp)
+            val b = cal.get(Calendar.DAY_OF_WEEK) //sunday = 1
+            println("day: -> ${b}")
+            println("Cal: -> ${cal}")
+            return cal.get(Calendar.DAY_OF_WEEK)
+        }
+
         fun getLengthOfFast(start: Long, end: Long): Long {
             return end - start
         }
@@ -112,18 +129,20 @@ class TimeUtils {
 
         fun convertMillisToX(millis: Long, timeType: TimeType = TimeType.SECONDS): Float {
             //TODO handle timeypes
-            return when(timeType){
+            return when (timeType) {
                 TimeType.SECONDS -> {
                     (millis / 1000).toFloat()
                 }
+
                 TimeType.HOUR -> {
-                    println("---${((millis / (1000*60)) % 60)}")
+                    println("---${((millis / (1000 * 60)) % 60)}")
                     println("---${millis}")
-                    val minutes = (((millis / (1000*60)) % 60).toFloat()/60)
-                        //int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
-                    val hours = ((millis / (1000*60*60)) % 24)
+                    val minutes = (((millis / (1000 * 60)) % 60).toFloat() / 60)
+                    //int hours   = (int) ((milliseconds / (1000*60*60)) % 24);
+                    val hours = ((millis / (1000 * 60 * 60)) % 24)
                     hours + minutes
                 }
+
                 else -> {
                     (millis / 1000).toFloat()
                 }

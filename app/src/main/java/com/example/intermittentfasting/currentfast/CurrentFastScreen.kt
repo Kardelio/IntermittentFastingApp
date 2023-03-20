@@ -73,20 +73,6 @@ fun CurrentFastScreen(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (isActive) {
-//            var passed by remember { mutableStateOf("") }
-//            var remaining by remember { mutableStateOf("") }
-//            LaunchedEffect(Unit) {
-//                while (true) {
-//                    passed = vm.getTimePassed()
-//                    remaining = vm.getTimeRemaining()
-//                    delay(1000)
-//                }
-//            }
-//            Text("Currently FASTING: Started on ${fast?.startTime}")
-//            Text("Time elapsed: ${passed}")
-//            Text("Target Hours: ${fast?.targetHours}")
-//            Text("End Time: ${fast?.endTimeToDisplay}")
-//            Text("Time remaining till target: ${remaining}")
             fast?.let {
                 CurrentlyFasting(
                     modifier = Modifier.weight(1f),
@@ -107,7 +93,8 @@ fun CurrentFastScreen(
                 vm.toggleFast()
             }
         }
-        CurrentFastFooter(fast?.startTime ?: "", fast?.endTimeToDisplay ?: "")
+        Footer(currentlyFasting = isActive, startTime = fast?.startTime ?: "", endTime = fast?.endTimeToDisplay ?: "")
+//        CurrentFastFooter(fast?.startTime ?: "", fast?.endTimeToDisplay ?: "")
         DateAndTimePicker(
             modifier = Modifier.padding(vertical = 8.dp),
             label = "Forgot to " + if (!isActive) "Start" else "End",
@@ -132,9 +119,25 @@ fun CurrentFastScreen(
 }
 
 @Composable
+fun Footer(currentlyFasting: Boolean, startTime: String, endTime: String) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(64.dp), contentAlignment = Alignment.Center){
+        if(currentlyFasting){
+            CurrentFastFooter(startTime = startTime, endTime = endTime)
+        }else{
+
+        }
+    }
+}
+
+@Composable
 fun CurrentFastFooter(startTime: String, endTime: String) {
-    Text("Start Time: ${startTime}")
-    Text("End Time: ${endTime}")
+    Column {
+
+        Text("Start Time: ${startTime}")
+        Text("End Time: ${endTime}")
+    }
 }
 
 @Composable

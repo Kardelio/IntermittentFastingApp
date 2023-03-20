@@ -9,14 +9,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PointMode
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -119,8 +122,12 @@ fun LineGraph(
     showYAxisLabels: Boolean = true,
     curved: Boolean = false,
     showXAmountOfDataPoints: Int = 7,
-    barColor: Color = Color.Green
+    barColor: Color = Color.Green,
+    lastFastDaysSinceWeekend: Int = 0,
+    showDaysFlag: Boolean = false
 ) {
+    val vectorCheckMark = ImageVector.vectorResource(id = R.drawable.ic_check)
+    val vectorPainter = rememberVectorPainter(image = vectorCheckMark)
 
     val tm = rememberTextMeasurer()
     Spacer(modifier = Modifier
@@ -171,6 +178,10 @@ fun LineGraph(
                     } else {
                         showXAmountOfDataPoints - 1
                     }
+                    /*
+                    get day of last fast....
+
+                     */
                     val verticalSize = size.width / (vertlines + 1)
                     repeat(vertlines) { i ->
                         val startX = verticalSize * (i + 1)
@@ -181,6 +192,18 @@ fun LineGraph(
                             strokeWidth = 1.dp.toPx()
                         )
                     }
+                    if(showDaysFlag){
+                        val initialWeekend = (vertlines + 1) - lastFastDaysSinceWeekend
+                        var counter = 0
+                        for (i in vertlines + 1 downTo 0) {
+                            val startX = verticalSize * (i)
+                            if ((i + (counter * 7)) == initialWeekend) {
+                                drawRect(color = Color.LightGray.copy(alpha = 0.5f), topLeft = Offset(startX, 0f),size = Size(verticalSize*2,size.height))
+                                counter++
+                            }
+                        }
+                    }
+
 
                     val amountOfLinesHor = 23
                     val horizontalSize = size.height / (amountOfLinesHor + 1)
@@ -239,13 +262,26 @@ fun LineGraph(
                 drawPath(filledPath, brush = gradBrush, style = Fill)
 
                 if (listOfTargetBeats.isNotEmpty()) {
-                    drawPoints(
-                        points = listOfTargetBeats.map { Offset(it.x, it.y) },
-                        pointMode = PointMode.Points,
-                        color = Color.Green,
-                        strokeWidth = 20f,
-                        cap = StrokeCap.Round
-                    )
+                    listOfTargetBeats.forEach {
+
+                        withTransform({
+                            translate(it.x - 15, it.y)
+                        }) {
+                            with(vectorPainter) {
+                                draw(
+                                    Size(40f, 40f),
+                                    colorFilter = ColorFilter.tint(color = barColor)
+                                )
+                            }
+                        }
+                    }
+//                    drawPoints(
+//                        points = listOfTargetBeats.map { Offset(it.x, it.y) },
+//                        pointMode = PointMode.Points,
+//                        color = Color.Green,
+//                        strokeWidth = 20f,
+//                        cap = StrokeCap.Round
+//                    )
                 }
             }
         })
