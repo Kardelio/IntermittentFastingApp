@@ -3,6 +3,7 @@ package com.example.intermittentfasting.pastfasts
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.intermittentfasting.common.SnackBarFlow
 import com.example.intermittentfasting.domain.FastUseCase
 import com.example.intermittentfasting.domain.FileUseCase
 import com.example.intermittentfasting.model.EmptyFast
@@ -23,7 +24,8 @@ import javax.inject.Inject
 class PastFastsViewModel @Inject constructor(
     private val usecase: FastUseCase,
     private val fileUseCase: FileUseCase,
-    private val locale: Locale
+    private val locale: Locale,
+    private val snackBarFlow: SnackBarFlow
 ) : ViewModel() {
 
     private val _pastfasts: MutableStateFlow<List<FastContainer>> = MutableStateFlow(emptyList())
@@ -69,6 +71,9 @@ class PastFastsViewModel @Inject constructor(
 
     fun exportFileToDownloads() {
         fileUseCase.writeFileWithFasts()
+        //TODO
+        //println(" ${snackBarFlow.hashCode()}")
+        snackBarFlow.notifyChange("Saved file to Downloads")
     }
 
     fun importFileFromDownloads() {

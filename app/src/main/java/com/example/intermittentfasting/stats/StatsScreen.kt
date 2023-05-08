@@ -73,15 +73,18 @@ fun StatsScreenContents(stats: StatBlock, toggleChanged: (Boolean) -> Unit) {
         mutableStateOf(AmountToShow.ALL)
     }
     var showDays by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
     var showTargets by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
     var selectedCoolOption by remember {
         mutableStateOf("one")
     }
     val scrollState = rememberScrollState()
+    LaunchedEffect(key1 = Unit){
+        toggleChanged(showDays)
+    }
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         //TODO handle no stats situation
         LineGraph(

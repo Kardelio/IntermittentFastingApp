@@ -33,6 +33,8 @@ class FileUseCaseImpl @Inject constructor(
             val gsonned = gson.toJson(fasts)
 
             fileRepository.writeToFile(gsonned)
+            fileRepository.writeToFileNew(gsonned)
+            fileRepository.downloadLocalFileToDownloads(gsonned)
 
         }.invokeOnCompletion {
             Log.d("BK", "Completion")

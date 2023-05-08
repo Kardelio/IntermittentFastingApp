@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.intermittentfasting.alarm.AlarmScheduler
 import com.example.intermittentfasting.alarm.AlarmSchedulerImpl
+import com.example.intermittentfasting.common.SnackBarFlow
+import com.example.intermittentfasting.common.SnackBarFlowImpl
 import com.google.gson.Gson
 import dagger.Binds
 import dagger.Module
@@ -33,5 +35,9 @@ class AppModule {
     interface InnerAppModule {
         @Binds
         fun provideAlarmScheduler(scheduler: AlarmSchedulerImpl): AlarmScheduler
+
+        @Binds
+        @Singleton //Important so its the same object
+        fun providesSnackBarFlow(snackBarFlow: SnackBarFlowImpl): SnackBarFlow
     }
 }

@@ -196,7 +196,7 @@ fun LineGraph(
                         val initialWeekend = (vertlines + 1) - lastFastDaysSinceWeekend
                         var counter = 0
                         for (i in vertlines + 1 downTo 0) {
-                            val startX = verticalSize * (i)
+                            val startX = (verticalSize * (i)) - (verticalSize / 2)
                             if ((i + (counter * 7)) == initialWeekend) {
                                 drawRect(color = Color.LightGray.copy(alpha = 0.5f), topLeft = Offset(startX, 0f),size = Size(verticalSize*2,size.height))
                                 counter++

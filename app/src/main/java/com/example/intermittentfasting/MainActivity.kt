@@ -3,6 +3,7 @@ package com.example.intermittentfasting
 import android.Manifest
 import android.app.NotificationManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,12 +23,16 @@ import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -36,12 +41,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.intermittentfasting.awards.AwardsScreen
+import com.example.intermittentfasting.common.SnackBarFlow
 import com.example.intermittentfasting.currentfast.CurrentFastScreen
+import com.example.intermittentfasting.data.FileRepository
 import com.example.intermittentfasting.manualentry.ManualEntryScreen
 import com.example.intermittentfasting.pastfasts.PastFastsScreen
 import com.example.intermittentfasting.stats.StatsScreen
 import com.example.intermittentfasting.ui.theme.IntermittentFastingTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import javax.inject.Inject
 
 enum class IFTabs(
     val title: String,
@@ -65,6 +74,10 @@ object IFDestinations {
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var snackBarFlow: SnackBarFlow
+
     private val activityResultLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -79,7 +92,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             IntermittentFastingTheme {
                 // A surface container using the 'background' color from the theme
-                IMApp()
+                IMApp(snackBarFlow)
             }
         }
     }
@@ -88,18 +101,29 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         askForNotificationPermission()
+
+//        val a =repo.test(this)
+//        println(a)
     }
 
     private fun askForNotificationPermission() {
         activityResultLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+//        activityResultLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+//        activityResultLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 }
 
 @Composable
-fun IMApp() {
+fun IMApp(snackBarFlow: SnackBarFlow) {
     val navController = rememberNavController()
     val tabs = remember {
         IFTabs.values()
+    }
+    val context = LocalContext.current
+    LaunchedEffect(key1 = Unit){
+        snackBarFlow.collectChanges().collect {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
     }
     Scaffold(
         bottomBar = {
